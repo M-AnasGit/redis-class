@@ -305,6 +305,30 @@ class ElastiCache {
 	}
 
 	/**
+	 * Refreshes the time-to-live (TTL) for a given key in Redis.
+	 *
+	 * @param {string} key - The key to refresh the time-to-live for.
+	 * @param {number} ttl - The time-to-live in seconds.
+	 *
+	 * @returns {Promise<void>} Resolves when the key is successfully refreshed.
+	 *
+	 * @throws {HttpError} Throws error if the key does not exist or if refreshing fails.
+	 */
+	async refreshKey(key, ttl) {
+		try {
+			const result = await this.client.expire(key, ttl)
+			if (result === 0) {
+				if (this.dev) console.log(`Key not found: ${key}`)
+				throw new HttpError('Key not found', 404)
+			}
+			if (this.dev) console.log(`Refreshed key: ${key}`)
+		} catch (error) {
+			if (this.dev) console.error('Error refreshing key in Redis:', error)
+			if (error instanceof HttpError) throw error
+		}
+	}
+
+	/**
 	 * Retrieves all keys matching a pattern from Redis.
 	 * @param {string} [pattern='*'] - The pattern to match the keys against.
 	 * @param {boolean} [parse=false] - If true, the values will be parsed as JSON.
