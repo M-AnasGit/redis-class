@@ -19,6 +19,7 @@ class ElastiCache {
 	constructor(redisConfig, dev = false) {
 		this.client = redis.createClient(redisConfig)
 		this.dev = dev
+		this.connected = false
 	}
 
 	/**
@@ -29,6 +30,7 @@ class ElastiCache {
 	async connect() {
 		try {
 			await this.client.connect()
+			this.connected = true
 			if (this.dev) console.log('Connected to Redis')
 		} catch (err) {
 			if (this.dev) console.error('Redis connection failed', err)
@@ -44,11 +46,20 @@ class ElastiCache {
 	async disconnect() {
 		try {
 			await this.client.disconnect()
+			this.connected = false
 			if (this.dev) console.log('Disconnected from Redis')
 		} catch (err) {
 			if (this.dev) console.error('Redis disconnection failed', err)
 			throw new HttpError('Redis disconnection failed', 500)
 		}
+	}
+
+	/**
+	 * Checks if the client is connected to the Redis server.
+	 * @returns {boolean} True if connected, false otherwise.
+	 */
+	async get_isConnected() {
+		return this.connected
 	}
 
 	/**
