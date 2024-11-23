@@ -215,14 +215,14 @@ class ElastiCache {
 	 * @throws {HttpError} Throws error if no keys match or fetching fails.
 	 * @returns {Promise<Object[]>} An array of objects with key-value pairs.
 	 */
-	async getByPrefix(prefix) {
+	async getByPrefix(prefix, list = true) {
 		try {
 			const keys = await this.client.keys(`${prefix}:*`)
 			if (keys.length === 0) {
 				if (this.dev) console.log(`Index not found with prefix: ${prefix}`)
 				throw new HttpError('Index not found', 404)
 			}
-			const values = await Promise.all(keys.map((key) => this.get(key, true)))
+			const values = await Promise.all(keys.map((key) => (list ? this.listGet(key, 0, -1, true) : this.get(key, true))))
 			return keys.map((key, index) => ({ [key]: values[index] }))
 		} catch (err) {
 			if (this.dev) console.error('Error fetching keys by prefix:', err)
