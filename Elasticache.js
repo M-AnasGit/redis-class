@@ -417,6 +417,24 @@ class ElastiCache {
 			throw new HttpError('Error deleting all keys from Redis', 500)
 		}
 	}
+
+	/**
+	 *
+	 * @param {string} script
+	 * @param {Array} keys
+	 * @param {Array} args
+	 * @returns
+	 */
+	async runLuaScript(script, keys, args) {
+		try {
+			const result = await this.client.eval(script, keys.length, ...keys, ...args)
+			if (this.dev) console.log('Lua script executed successfully')
+			return result
+		} catch (err) {
+			if (this.dev) console.error('Error running Lua script:', err)
+			throw new HttpError('Error running Lua script', 500)
+		}
+	}
 }
 
 module.exports = ElastiCache
